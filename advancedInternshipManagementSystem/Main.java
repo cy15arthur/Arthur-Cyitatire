@@ -155,9 +155,6 @@ public class Main{
             }
         }
     }
-
-    // ---------- Helper Methods ----------
-
     private static String inputString(String prompt) {
         while (true) {
             System.out.print(prompt);
@@ -261,7 +258,7 @@ public class Main{
                     return choice;
                 }
             } catch (Exception e) {
-                // Fallthrough to print error
+               
             }
             System.out.println("Invalid choice. Try again.");
         }
