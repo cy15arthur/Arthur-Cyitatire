@@ -1,248 +1,206 @@
-package vehiclemanagementsystem;
+package advancedtaxsystem;
 
-import java.util.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 public class Main {
 
-    private static final Scanner scanner = new Scanner(System.in);
-    private static final List<Vehicle> vehicles = new ArrayList<>();
-    private static final Set<String> registrationNumbers = new HashSet<>();
-    private static final Set<String> vehicleIds = new HashSet<>();
+    private static List<TaxDeclaration> declarations = new ArrayList<>();
+    private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-        while (true) {
-            System.out.println("\n----- Vehicle Tax Management System -----");
-            System.out.println("1. Register a new vehicle");
-            System.out.println("2. View registered vehicles");
-            System.out.println("3. Calculate tax for all vehicles");
-            System.out.println("4. Generate tax reports");
-            System.out.println("5. Exit");
-            System.out.print("Choose an option: ");
+        boolean running = true;
 
-            String choice = scanner.nextLine().trim();
+        System.out.println("===== Welcome to RRA Tax Management System =====");
+
+        while (running) {
+            System.out.println("\nPlease choose an option:");
+            System.out.println("1. Declare PAYE");
+            System.out.println("2. Declare VAT");
+            System.out.println("3. Declare Withholding Tax");
+            System.out.println("4. View Compliance Reports");
+            System.out.println("5. Print Tax Receipts");
+            System.out.println("6. Exit");
+            System.out.print("Enter your choice: ");
+
+            String choice = scanner.nextLine();
 
             switch (choice) {
                 case "1":
-                    registerVehicle();
+                    declarePAYE();
                     break;
                 case "2":
-                    viewRegisteredVehicles();
+                    declareVAT();
                     break;
                 case "3":
-                    calculateTaxes();
+                    declareWithholding();
                     break;
                 case "4":
-                    generateTaxReports();
+                    viewComplianceReports();
                     break;
                 case "5":
-                    System.out.println("Exiting system. Goodbye!");
-                    System.exit(0);
+                    printReceipts();
+                    break;
+                case "6":
+                    System.out.println("Exiting the system. Goodbye!");
+                    running = false;
                     break;
                 default:
-                    System.out.println("Invalid choice. Please select a valid option.");
+                    System.out.println("Invalid choice. Please enter a number from 1 to 6.");
             }
         }
     }
 
-    private static void registerVehicle() {
-        System.out.println("\n--- Register a New Vehicle ---");
-
-        String type = getValidatedVehicleType();
-        String vehicleId = getValidatedVehicleId();
-        String ownerName = getValidatedOwnerName();
-        int yearOfFabrication = getValidatedYearOfFabrication();
-        String registrationNumber = getValidatedRegistrationNumber();
-        double baseTaxRate = getValidatedBaseTaxRate();
-
-        Vehicle vehicle = null;
-
-        switch (type.toLowerCase()) {
-            case "car":
-                boolean isElectric = getValidatedBoolean("Is the car electric? (true/false): ");
-                vehicle = new Car(vehicleId, ownerName, yearOfFabrication, registrationNumber, baseTaxRate, isElectric);
-                break;
-            case "truck":
-                double loadCapacity = getValidatedPositiveDouble("Enter load capacity in tons: ");
-                vehicle = new Truck(vehicleId, ownerName, yearOfFabrication, registrationNumber, baseTaxRate, loadCapacity);
-                break;
-            case "motorcycle":
-                int engineCapacity = getValidatedPositiveInt("Enter engine capacity in cc: ");
-                vehicle = new Motorcycle(vehicleId, ownerName, yearOfFabrication, registrationNumber, baseTaxRate, engineCapacity);
-                break;
-            case "bus":
-                int passengerCapacity = getValidatedPositiveInt("Enter passenger capacity: ");
-                vehicle = new Bus(vehicleId, ownerName, yearOfFabrication, registrationNumber, baseTaxRate, passengerCapacity);
-                break;
-            case "suv":
-                boolean fourWheelDrive = getValidatedBoolean("Is it a four-wheel drive (4WD)? (true/false): ");
-                vehicle = new SUV(vehicleId, ownerName, yearOfFabrication, registrationNumber, baseTaxRate, fourWheelDrive);
-                break;
-        }
-
-        if (vehicle != null) {
-            vehicles.add(vehicle);
-            registrationNumbers.add(registrationNumber);
-            vehicleIds.add(vehicleId);
-            System.out.println("Vehicle registered successfully!");
-            System.out.println(vehicle);
-        }
-    }
-
-    private static void viewRegisteredVehicles() {
-        if (vehicles.isEmpty()) {
-            System.out.println("\nNo vehicles registered yet.");
-            return;
-        }
-        System.out.println("\n--- Registered Vehicles ---");
-        for (Vehicle v : vehicles) {
-            System.out.println(v);
-        }
-    }
-
-    private static void calculateTaxes() {
-        if (vehicles.isEmpty()) {
-            System.out.println("\nNo vehicles registered yet.");
-            return;
-        }
-        System.out.println("\n--- Calculating Taxes ---");
-        for (Vehicle v : vehicles) {
-            System.out.println("Vehicle ID: " + v.getVehicleId() + ", Tax Amount: " + v.calculateTax());
-        }
-    }
-
-    private static void generateTaxReports() {
-        if (vehicles.isEmpty()) {
-            System.out.println("\nNo vehicles registered yet.");
-            return;
-        }
-        System.out.println("\n--- Tax Reports ---");
-        for (Vehicle v : vehicles) {
-            v.generateTaxReport();
-        }
-    }
-
-    private static String getValidatedVehicleType() {
-        System.out.print("Enter vehicle type (Car, Truck, Motorcycle, Bus, SUV): ");
-        String type = scanner.nextLine().trim();
-        while (!(type.equalsIgnoreCase("Car") || type.equalsIgnoreCase("Truck") ||
-                type.equalsIgnoreCase("Motorcycle") || type.equalsIgnoreCase("Bus") ||
-                type.equalsIgnoreCase("SUV"))) {
-            System.out.print("Invalid type. Enter again (Car, Truck, Motorcycle, Bus, SUV): ");
-            type = scanner.nextLine().trim();
-        }
-        return type;
-    }
-
-    private static String getValidatedVehicleId() {
-        System.out.print("Enter vehicle ID (letters/numbers only): ");
-        String id = scanner.nextLine().trim();
-        while (!id.matches("[a-zA-Z0-9]+") || vehicleIds.contains(id)) {
-            System.out.print("Invalid or duplicate ID. Enter a different one: ");
-            id = scanner.nextLine().trim();
-        }
-        return id;
-    }
-
-    private static String getValidatedOwnerName() {
-        System.out.print("Enter owner's name (letters only): ");
-        String name = scanner.nextLine().trim();
-        while (!name.matches("[a-zA-Z ]+")) {
-            System.out.print("Invalid name. Enter again: ");
-            name = scanner.nextLine().trim();
-        }
-        return name;
-    }
-
-    private static int getValidatedYearOfFabrication() {
-        int year = -1;
-        while (true) {
+    private static void declarePAYE() {
+        boolean valid = false;
+        while (!valid) {
             try {
-                System.out.print("Enter year of fabrication: ");
-                year = Integer.parseInt(scanner.nextLine().trim());
-                int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-                if (year <= 1885 || year > currentYear) {
-                    System.out.println("Year must be between 1886 and " + currentYear + ".");
-                } else {
-                    break;
+                System.out.println("\n--- PAYE Declaration ---");
+
+                System.out.print("Enter Declaration ID: ");
+                String id = scanner.nextLine();
+
+                System.out.print("Enter Taxpayer Name: ");
+                String name = scanner.nextLine();
+
+                System.out.print("Enter Taxpayer TIN (9 digits): ");
+                String tin = scanner.nextLine();
+                if (!tin.matches("\\d{9}")) {
+                    System.out.println("Invalid TIN format! Please enter a valid 9-digit TIN.");
+                    continue;
                 }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
+
+                System.out.print("Enter Gross Salary: ");
+                double salary = Double.parseDouble(scanner.nextLine());
+                if (salary <= 0) {
+                    System.out.println("Salary must be positive! Please enter a valid salary.");
+                    continue;
+                }
+
+                LocalDate date = LocalDate.now();
+
+                PayedDeclaration paye = new PayedDeclaration(id, name, tin, date, salary);
+                paye.validateDeclaration();
+                paye.calculateTax();
+                declarations.add(paye);
+
+                System.out.println("PAYE Declaration submitted successfully.");
+                valid = true;
+
+            } catch (Exception e) {
+                System.out.println("Error in PAYE Declaration: " + e.getMessage());
             }
         }
-        return year;
     }
 
-    private static String getValidatedRegistrationNumber() {
-        System.out.print("Enter registration number (letters/numbers only): ");
-        String reg = scanner.nextLine().trim();
-        while (!reg.matches("[a-zA-Z0-9]+") || registrationNumbers.contains(reg)) {
-            System.out.print("Invalid or duplicate registration number. Enter again: ");
-            reg = scanner.nextLine().trim();
-        }
-        return reg;
-    }
-
-    private static double getValidatedBaseTaxRate() {
-        double rate = -1;
-        while (true) {
+    private static void declareVAT() {
+        boolean valid = false;
+        while (!valid) {
             try {
-                System.out.print("Enter base tax rate: ");
-                rate = Double.parseDouble(scanner.nextLine().trim());
-                if (rate <= 0) {
-                    System.out.println("Base tax rate must be positive.");
-                } else {
-                    break;
+                System.out.println("\n--- VAT Declaration ---");
+
+                System.out.print("Enter Declaration ID: ");
+                String id = scanner.nextLine();
+
+                System.out.print("Enter Taxpayer Name: ");
+                String name = scanner.nextLine();
+
+                System.out.print("Enter Taxpayer TIN (9 digits): ");
+                String tin = scanner.nextLine();
+                if (!tin.matches("\\d{9}")) {
+                    System.out.println("Invalid TIN format! Please enter a valid 9-digit TIN.");
+                    continue;
                 }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
+
+                System.out.print("Enter Taxable Sales: ");
+                double sales = Double.parseDouble(scanner.nextLine());
+
+                System.out.print("Enter Purchases: ");
+                double purchases = Double.parseDouble(scanner.nextLine());
+
+                if (sales <= purchases) {
+                    System.out.println("Sales must be greater than Purchases! Please enter valid values.");
+                    continue;
+                }
+
+                LocalDate date = LocalDate.now();
+
+                VATDeclaration vat = new VATDeclaration(id, name, tin, date, sales, purchases);
+                vat.validateDeclaration();
+                vat.calculateTax();
+                declarations.add(vat);
+
+                System.out.println("VAT Declaration submitted successfully.");
+                valid = true;
+
+            } catch (Exception e) {
+                System.out.println("Error in VAT Declaration: " + e.getMessage());
             }
         }
-        return rate;
     }
 
-    private static boolean getValidatedBoolean(String message) {
-        System.out.print(message);
-        String input = scanner.nextLine().trim();
-        while (!(input.equalsIgnoreCase("true") || input.equalsIgnoreCase("false"))) {
-            System.out.print("Invalid input. Enter 'true' or 'false': ");
-            input = scanner.nextLine().trim();
-        }
-        return Boolean.parseBoolean(input);
-    }
-
-    private static double getValidatedPositiveDouble(String message) {
-        double value = -1;
-        while (true) {
+    private static void declareWithholding() {
+        boolean valid = false;
+        while (!valid) {
             try {
-                System.out.print(message);
-                value = Double.parseDouble(scanner.nextLine().trim());
-                if (value <= 0) {
-                    System.out.println("Value must be positive.");
-                } else {
-                    break;
+                System.out.println("\n--- Withholding Tax Declaration ---");
+
+                System.out.print("Enter Declaration ID: ");
+                String id = scanner.nextLine();
+
+                System.out.print("Enter Taxpayer Name: ");
+                String name = scanner.nextLine();
+
+                System.out.print("Enter Taxpayer TIN (9 digits): ");
+                String tin = scanner.nextLine();
+                if (!tin.matches("\\d{9}")) {
+                    System.out.println("Invalid TIN format! Please enter a valid 9-digit TIN.");
+                    continue; // Retry input
                 }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
+
+                System.out.print("Enter Category (Rent, Dividends, Services): ");
+                String category = scanner.nextLine();
+
+                System.out.print("Enter Payment Amount: ");
+                double amount = Double.parseDouble(scanner.nextLine());
+
+                if (amount <= 0) {
+                    System.out.println("Amount must be positive! Please enter a valid amount.");
+                    continue; // Retry input
+                }
+
+                LocalDate date = LocalDate.now();
+
+                WithholdingTaxDeclaration wht = new WithholdingTaxDeclaration(id, name, tin, date, category);
+                wht.validateDeclaration();
+                wht.calculateTax();
+                declarations.add(wht);
+
+                System.out.println("Withholding Tax Declaration submitted successfully.");
+                valid = true; // End the loop
+
+            } catch (Exception e) {
+                System.out.println("Error in Withholding Tax Declaration: " + e.getMessage());
             }
         }
-        return value;
     }
 
-    private static int getValidatedPositiveInt(String message) {
-        int value = -1;
-        while (true) {
-            try {
-                System.out.print(message);
-                value = Integer.parseInt(scanner.nextLine().trim());
-                if (value <= 0) {
-                    System.out.println("Value must be positive.");
-                } else {
-                    break;
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.");
+    private static void viewComplianceReports() {
+        System.out.println("\n--- Compliance Reports ---");
+        for (TaxDeclaration decl : declarations) {
+            System.out.println(decl.toString());
+            if (!decl.isPaid()) {
+                System.out.println("! Not Paid");
             }
         }
-        return value;
+    }
+
+    private static void printReceipts() {
+        System.out.println("\n--- Printing Tax Receipts ---");
+        for (TaxDeclaration decl : declarations) {
+            decl.generateReceipt();
+        }
     }
 }
